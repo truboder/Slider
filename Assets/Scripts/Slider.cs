@@ -8,45 +8,24 @@ using UnityEngine.UI;
 public class HPSlider : MonoBehaviour
 {
     [SerializeField] private Slider _slider;
-    [SerializeField] private float _maxHealth;
-    [SerializeField] private float _speedChange; 
-    [SerializeField] private float _damage;
+    
+    [SerializeField] private Player _unit;
 
-    private float _currentHealth;
-    private float _inaccuracy = 0.1f;
-
-    void Start()
+    private void Start()
     {
-        _currentHealth = _maxHealth;
-        _slider.maxValue = _maxHealth;
-        _slider.value = _currentHealth;
+        _slider.maxValue = _unit.Health;
+        _slider.value = _unit.Health;
+
+        _unit.OnHealthChange += UpdateHealth;
     }
 
-    void Update()
+    private void OnDestroy()
     {
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            StopAllCoroutines();
-            _currentHealth -= _damage;
-            StartCoroutine(ChangeHealth(x => x.value >= _currentHealth + _inaccuracy));
-        }
-
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            StopAllCoroutines();
-            _currentHealth += _damage;
-            StartCoroutine(ChangeHealth(x => x.value <= _currentHealth - _inaccuracy));
-        }
+        _unit.OnHealthChange -= UpdateHealth;
     }
 
-    private IEnumerator ChangeHealth(Predicate<Slider> predicate)
+    private void UpdateHealth(float health)
     {
-        while (predicate.Invoke(_slider))
-        {
-            _slider.value = Mathf.MoveTowards(_slider.value, _currentHealth, Time.deltaTime * _speedChange);
-
-            yield return null;
-        }
-        _slider.value = _currentHealth;
+        _slider.value = health;
     }
 }
